@@ -1,4 +1,5 @@
 #include "cryptography.h"
+#include "maths.h"
 
 volatile uint32_t timer_ticks = 0;
 volatile uint32_t keyboard_events = 0;

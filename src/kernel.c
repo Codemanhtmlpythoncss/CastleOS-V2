@@ -4,6 +4,8 @@
 #include "idt/idt.h"
 #include "cryptography.h"
 #include "maths.h"
+#include "sqrt.h"
+#include <limits.h>
 
 uint16_t* video_mem = 0;
 uint16_t terminal_row = 0;
@@ -60,37 +62,87 @@ int colour_contrast(int incolour)
     }
 }
 
+void int_to_string(int num, char* str);
+void float_to_string(float value, char *str, int precision)
+{
+    if (precision < 0) precision = 0;
+
+    // handle negative values
+    if (value < 0.0f) {
+        *str++ = '-';
+        value = -value;
+    }
+
+    // rounding
+    float rounding = 0.5f;
+    for (int i = 0; i < precision; ++i) rounding *= 0.1f;
+    value += rounding;
+
+    int int_part = (int)value;
+    float frac = value - (float)int_part;
+
+    char int_buf[32];
+    int_to_string(int_part, int_buf);
+    char *p = int_buf;
+    while (*p) *str++ = *p++;
+
+    if (precision > 0) {
+        *str++ = '.';
+        for (int i = 0; i < precision; ++i) {
+            frac *= 10.0f;
+            int digit = (int)frac;
+            *str++ = '0' + digit;
+            frac -= (float)digit;
+        }
+    }
+
+    *str = '\0';
+}
+
 void int_to_string(int num, char* str)
 {
+    unsigned int n;
     int i = 0;
+    int start = 0;
 
-    if (num == 0)
-    {
+    if (str == 0) return;
+
+    if (num == 0) {
         str[0] = '0';
         str[1] = '\0';
         return;
     }
 
-    while (num > 0)
-    {
-        str[i++] = '0' + (num % 10);
-        num /= 10;
+    if (num < 0) {
+        str[i++] = '-';
+        /*
+         * Convert magnitude using unsigned to handle INT_MIN.
+         * For negative num: -(unsigned)num yields correct magnitude.
+         */
+        n = (unsigned int)(-(num + 1)) + 1u;
+        start = 1; // digits start after '-'
+    } else {
+        n = (unsigned int)num;
     }
 
-    str[i] = '\0';
+    /* write digits in reverse starting at str[i] */
+    int j = i;
+    while (n > 0) {
+        str[j++] = (char)('0' + (n % 10));
+        n /= 10;
+    }
 
-    // reverse the string
-    int start = 0;
-    int end = i - 1;
+    str[j] = '\0';
 
-    while (start < end)
-    {
-        char temp = str[start];
-        str[start] = str[end];
-        str[end] = temp;
-
-        start++;
-        end--;
+    /* reverse only the digit portion (preserve '-' if present) */
+    int left = start;
+    int right = j - 1;
+    while (left < right) {
+        char tmp = str[left];
+        str[left] = str[right];
+        str[right] = tmp;
+        left++;
+        right--;
     }
 }
 
@@ -174,6 +226,8 @@ void print(const char* str, char colour)
 	}
 }
 
+extern int problem();
+
 void kernel_main()
 {
 	random_init();
@@ -193,6 +247,11 @@ void kernel_main()
 
 	print("Initialising interrupt descriptor table ", 15);
 	idt_init();
+	print("[", 15);
+	print(" OK ", 2);
+	print("]\n", 15);
+	print("Testing IDT div by zero: ", 15);
+	problem();
 	print("[", 15);
 	print(" OK ", 2);
 	print("]\n", 15);
@@ -302,6 +361,21 @@ void kernel_main()
 		print(power_teststr4, 15);
 		done = 1;
 	}
+	float sqrt_test0 = ks_sqrt(5);
+	char sqrt_test1[32];
+	print("\nTesting SQRT function: ", 15);
+	float error = ks_sqrt(5) - 2.2360679775f;
+
+	if (error < 0)
+    	error = -error;
+	if (error < 0.0001f)
+	{
+    	print("[", 15);
+    	print(" OK ", 2);
+    	print("] ", 15);
+	}
+	float_to_string(sqrt_test0, sqrt_test1, 12);
+	print(sqrt_test1, 15);
 	
 	uint8_t aes_key[32];
 	generate_aes256_key(aes_key);
