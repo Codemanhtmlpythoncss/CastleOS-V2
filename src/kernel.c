@@ -38,6 +38,101 @@ uint16_t terminal_make_char(char c, char colour)
 	return (colour << 8) | c;
 }
 
+const char* TerryQuotes[] =
+{
+	"\"An idiot admires complexity, a genius admires simplicity, a physicist tries to make it simple, for an idiot anything the more complicated it is the more he will admire it, if you make something so clusterfucked he can't understand it he's gonna think you're a god cause you made it so complicated nobody can understand it. That's how they write journals in Academics, they try to make it so complicated people think you're a genius\" \n- Terry Davis, Creator of Temple OS, RIP",
+	"\"Real programmers can write assembly code in any language.\"\n- Terry Davis, Creator of Temple OS, RIP",
+	"\"What's reality? I don't know.\" \n- Terry Davis, Creator of TempleOS, RIP",
+	"\"The bird is okay even though he doesn't understand the world. You're that bird looking at the monitor, and you're thinking to yourself, 'I can figure this out'.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"The difference between an amateur and a professional is you write your own fucking compiler.\" \n- Terry Davis, Creator of TempleOS, RIP",
+	"\"So, someone wanted to know what I use Ubuntu for. I use it to download VMware to run TempleOS.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"I like elephants and God likes elephants.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"God likes music that makes you feel.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"You banned me from Twitter, God bans you from Heaven.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"The first time you meet an angel you get a horrible beating.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"I wrote my own compiler I'm not a ****** like Linus\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"God said TempleOS was destined to be the third temple.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"Computers are made for making things.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"I don't use Linux. I use Linux to download things for TempleOS.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"If you don't understand it, then simplify it.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"I made an operating system from scratch.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"The best code is code you can understand.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"Everybody thinks they're going to change the world.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"I like making things.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"The simpler it is, the easier it is to know it's correct.\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"TempleOS is my masterpiece.\"\n- Terry Davis, Creator of TempleOS, RIP"
+};
+
+void terry_quote()
+{
+	print(TerryQuotes[random_range(0, 20)], 15);
+}
+
+void double_to_string(double value, char *buffer, int precision)
+{
+    char *ptr = buffer;
+
+    /* Handle negative numbers */
+    if (value < 0.0)
+    {
+        *ptr++ = '-';
+        value = -value;
+    }
+
+    /* Round to requested precision */
+    double rounding = 0.5;
+    for (int i = 0; i < precision; i++)
+        rounding /= 10.0;
+
+    value += rounding;
+
+    /* Integer part (32-bit only) */
+    uint32_t int_part = (uint32_t)value;
+
+    /* Fractional part */
+    double frac_part = value - (double)int_part;
+
+    /* Convert integer part */
+    char temp[16];
+    int pos = 0;
+
+    if (int_part == 0)
+    {
+        temp[pos++] = '0';
+    }
+    else
+    {
+        while (int_part > 0)
+        {
+            temp[pos++] = '0' + (int_part % 10);
+            int_part /= 10;
+        }
+    }
+
+    /* Reverse integer digits */
+    while (pos > 0)
+        *ptr++ = temp[--pos];
+
+    /* Decimal point */
+    if (precision > 0)
+    {
+        *ptr++ = '.';
+
+        for (int i = 0; i < precision; i++)
+        {
+            frac_part *= 10.0;
+
+            int digit = (int)frac_part;
+
+            *ptr++ = '0' + digit;
+
+            frac_part -= digit;
+        }
+    }
+
+    *ptr = '\0';
+}
+
 int colour_contrast(int incolour)
 {
 	switch (incolour)
@@ -361,26 +456,100 @@ void kernel_main()
 		print(power_teststr4, 15);
 		done = 1;
 	}
-	float sqrt_test0 = ks_sqrt(5);
-	char sqrt_test1[32];
+	double sqrt_test0 = ks_sqrt(10.0);
+	char sqrt_teststr0[32];
+	double sqrt_test1 = ks_sqrt(9.0);
+	char sqrt_teststr1[32];
+	double sqrt_test2 = ks_sqrt(8.0);
+	char sqrt_teststr2[32];
+	double sqrt_test3 = ks_sqrt(7.0);
+	char sqrt_teststr3[32];
+	double sqrt_test4 = ks_sqrt(6.0);
+	char sqrt_teststr4[32];
+	double sqrt_test5 = ks_sqrt(5.0);
+	char sqrt_teststr5[32];
+	double sqrt_test6 = ks_sqrt(4.0);
+	char sqrt_teststr6[32];
+	double sqrt_test7 = ks_sqrt(3.0);
+	char sqrt_teststr7[32];
+	double sqrt_test8 = ks_sqrt(2.0);
+	char sqrt_teststr8[32];
+	double sqrt_test9 = ks_sqrt(1.0);
+	char sqrt_teststr9[32];
 	print("\nTesting SQRT function: ", 15);
-	float error = ks_sqrt(5) - 2.2360679775f;
+	double error0 = sqrt_test0 - 3.162277660168379332;
+	double error1 = sqrt_test0 - 3.000000000000000000;
+	double error2 = sqrt_test0 - 2.828427124746190098;
+	double error3 = sqrt_test0 - 2.645751311064590591;
+	double error4 = sqrt_test0 - 2.449489742783178098;
+	double error5 = sqrt_test0 - 2.236067977499789696;
+	double error6 = sqrt_test0 - 2.000000000000000000;
+	double error7 = sqrt_test0 - 1.732050807568877294;
+	double error8 = sqrt_test0 - 1.414213562373095049;
+	double error9 = sqrt_test0 - 1.000000000000000000;
 
-	if (error < 0)
-    	error = -error;
-	if (error < 0.0001f)
+	if (error0 || error1 || error2 || error3 || error4 || error5 || error6 || error7 || error8 || error9 < 0)
+    	error0 = -error0;
+		error1 = -error1;
+		error2 = -error2;
+		error3 = -error3;
+		error4 = -error4;
+		error5 = -error5;
+		error6 = -error6;
+		error7 = -error7;
+		error8 = -error8;
+		error9 = -error9;
+	if (error0 && error1 && error2 && error3 && error4 && error5 && error6 && error7 && error8 && error9 < 0.0001f)
 	{
     	print("[", 15);
     	print(" OK ", 2);
-    	print("] ", 15);
+    	print("] \n", 15);
 	}
-	float_to_string(sqrt_test0, sqrt_test1, 12);
-	print(sqrt_test1, 15);
+	double_to_string(sqrt_test0, sqrt_teststr0, 15);
+	double_to_string(sqrt_test1, sqrt_teststr1, 15);
+	double_to_string(sqrt_test2, sqrt_teststr2, 15);
+	double_to_string(sqrt_test3, sqrt_teststr3, 15);
+	double_to_string(sqrt_test4, sqrt_teststr4, 15);
+	double_to_string(sqrt_test5, sqrt_teststr5, 15);
+	double_to_string(sqrt_test6, sqrt_teststr6, 15);
+	double_to_string(sqrt_test7, sqrt_teststr7, 15);
+	double_to_string(sqrt_test8, sqrt_teststr8, 15);
+	double_to_string(sqrt_test9, sqrt_teststr9, 15);
+	print("Result log: \n", 15);
+	print("sqrt(10): ", 15);
+	print(sqrt_teststr0, 15);
+	print(",\n", 15);
+	print("sqrt(9): ", 15);
+	print(sqrt_teststr1, 15);
+	print(",\n", 15);
+	print("sqrt(8): ", 15);
+	print(sqrt_teststr2, 15);
+	print(",\n", 15);
+	print("sqrt(7): ", 15);
+	print(sqrt_teststr3, 15);
+	print(",\n", 15);
+	print("sqrt(6): ", 15);
+	print(sqrt_teststr4, 15);
+	print(",\n", 15);
+	print("sqrt(5): ", 15);
+	print(sqrt_teststr5, 15);
+	print(",\n", 15);
+	print("sqrt(4): ", 15);
+	print(sqrt_teststr6, 15);
+	print(",\n", 15);
+	print("sqrt(3): ", 15);
+	print(sqrt_teststr7, 15);
+	print(",\n", 15);
+	print("sqrt(2): ", 15);
+	print(sqrt_teststr8, 15);
+	print(",\n", 15);
+	print("sqrt(1): ", 15);
+	print(sqrt_teststr9, 15);
 	
 	uint8_t aes_key[32];
 	generate_aes256_key(aes_key);
 
 	print("\nAES-256 Key: ", text_colour);
-
 	print_hex(aes_key, 32, 0); // print aes key thats 32 bytes with no spaces
+	terry_quote();
 }

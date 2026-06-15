@@ -87,9 +87,19 @@ double ks_sqrt(double a) {
     double x = v.d;
 
     /* Newton-Raphson iterations: x_{n+1} = 0.5 * (x_n + a / x_n) */
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
     x = 0.5 * (x + x_in / x);
-    x = 0.5 * (x + x_in / x);
-    x = 0.5 * (x + x_in / x); /* third iteration for safety/precision */
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x);
+	x = 0.5 * (x + x_in / x); /* third iteration for safety/precision */
 
     /* If we scaled up a subnormal, scale down by sqrt(2^54) = 2^27 */
     if (is_subnormal) {
@@ -100,7 +110,8 @@ double ks_sqrt(double a) {
     }
 
     /* Final Newton refinement using original 'a' to reduce rounding error for scaled case */
-    x = 0.5 * (x + a / x);
+	double r = a / x;
+	x = 0.5 * (x + r);
 
     return x;
 }
