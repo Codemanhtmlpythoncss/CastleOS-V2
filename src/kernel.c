@@ -30,7 +30,7 @@ uint16_t yellow = 14;
 uint16_t white = 15;
 //colour settings variables
 uint16_t text_colour = 13;
-uint16_t bgcolour = 0;
+uint16_t bgcolour = 15;
 uint16_t foreground = 0;
  
 
@@ -326,7 +326,7 @@ void print(const char* str, char colour)
 void kernel_main()
 {
 	random_init();
-	bgcolour = 0;
+	bgcolour = black;
 	terminal_initialize();
 
 	print("Initialised entropy [", 15);
