@@ -6,6 +6,7 @@
 #include "maths.h"
 #include "sqrt.h"
 #include <limits.h>
+#include "io/io.h"
 
 uint16_t* video_mem = 0;
 uint16_t terminal_row = 0;
@@ -50,7 +51,7 @@ const char* TerryQuotes[] =
 	"\"God likes music that makes you feel.\"\n- Terry Davis, Creator of TempleOS, RIP",
 	"\"You banned me from Twitter, God bans you from Heaven.\"\n- Terry Davis, Creator of TempleOS, RIP",
 	"\"The first time you meet an angel you get a horrible beating.\"\n- Terry Davis, Creator of TempleOS, RIP",
-	"\"I wrote my own compiler I'm not a ****** like Linus\"\n- Terry Davis, Creator of TempleOS, RIP",
+	"\"I wrote my own compiler I'm not a idiot like Linus\"\n- Terry Davis, Creator of TempleOS, RIP",
 	"\"God said TempleOS was destined to be the third temple.\"\n- Terry Davis, Creator of TempleOS, RIP",
 	"\"Computers are made for making things.\"\n- Terry Davis, Creator of TempleOS, RIP",
 	"\"I don't use Linux. I use Linux to download things for TempleOS.\"\n- Terry Davis, Creator of TempleOS, RIP",
@@ -321,7 +322,6 @@ void print(const char* str, char colour)
 	}
 }
 
-extern int problem();
 
 void kernel_main()
 {
@@ -345,12 +345,6 @@ void kernel_main()
 	print("[", 15);
 	print(" OK ", 2);
 	print("]\n", 15);
-	print("Testing IDT div by zero: ", 15);
-	problem();
-	print("[", 15);
-	print(" OK ", 2);
-	print("]\n", 15);
-	
 	print("Testing randomness [", 15);
 	//generate 6 random numbers
 	char num = random_range(0, 50);
@@ -552,4 +546,5 @@ void kernel_main()
 	print("\nAES-256 Key: ", text_colour);
 	print_hex(aes_key, 32, 0); // print aes key thats 32 bytes with no spaces
 	terry_quote();
+	outb(0x60, 0xff);
 }

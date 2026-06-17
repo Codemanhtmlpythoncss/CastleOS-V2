@@ -1,6 +1,5 @@
 [BITS 32]
-global _start
-global problem
+global _start 
 extern kernel_main
 
 CODE_SEG equ 0x08
@@ -21,12 +20,5 @@ _start:
 	out 0x92, al
 	
 	call kernel_main
-
-	jmp $
-
-
-problem:
-	mov eax, 0
-	div eax
 
 times 512-($ - $$) db 0
