@@ -8,18 +8,21 @@
 #define DBL_EXP_MASK  0x7FF0000000000000ULL
 #define DBL_FRAC_MASK 0x000FFFFFFFFFFFFFULL
 
+// Preserve a NaN payload while marking the resulting NaN as quiet.
 static inline uint64_t make_qnan_payload(uint64_t payload) {
     payload &= DBL_FRAC_MASK;
     payload |= (1ULL << (DBL_MANT_BITS - 1)); /* set quiet-NaN bit */
     return payload;
 }
 
+// Reinterpret the binary64 representation without performing numeric conversion.
 static inline double bits_to_double(uint64_t u) {
     union { uint64_t u; double d; } v;
     v.u = u;
     return v.d;
 }
 
+// Extract the raw binary64 representation of a double.
 static inline uint64_t double_to_bits(double d) {
     union { uint64_t u; double d; } v;
     v.d = d;
@@ -52,7 +55,7 @@ double ks_sqrt(double a) {
         }
     }
 
-    /* Negative (except -0): return quiet NaN */
+    /* Negative (except -0): return quiet NaN because real square roots are undefined. */
     if ((ux & DBL_SIGN_MASK) && (ux & ~DBL_SIGN_MASK) != 0) {
         uint64_t qnan = DBL_EXP_MASK | (1ULL << (DBL_MANT_BITS - 1));
         return bits_to_double(qnan);
@@ -67,7 +70,7 @@ double ks_sqrt(double a) {
      * For positive normal/subnormal inputs compute sqrt:
      * - If subnormal, scale up by 2^54 to normalize, remember to scale down later.
      * - Make a bit-level initial approximation.
-     * - Perform three Newton iterations (safe for full double precision).
+     * - Refine the estimate with Newton iterations.
      */
 
     int is_subnormal = ((ux & DBL_EXP_MASK) == 0);
@@ -79,14 +82,14 @@ double ks_sqrt(double a) {
         x_in = a * pow54;
     }
 
-    /* Initial approximation: bit trick */
+    /* Initial approximation: halve the input's exponent encoding as a bit-level estimate. */
     union { double d; uint64_t u; } v;
     v.d = x_in;
     uint64_t approx = (v.u >> 1) + 0x1FF8000000000000ULL;
     v.u = approx;
     double x = v.d;
 
-    /* Newton-Raphson iterations: x_{n+1} = 0.5 * (x_n + a / x_n) */
+    /* Newton-Raphson iterations converge from the bit-level estimate toward sqrt(x_in). */
 	x = 0.5 * (x + x_in / x);
 	x = 0.5 * (x + x_in / x);
 	x = 0.5 * (x + x_in / x);

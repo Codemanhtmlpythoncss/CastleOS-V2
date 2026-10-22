@@ -8,10 +8,11 @@
 #include <limits.h>
 #include "io/io.h"
 
+// VGA text-mode state and the current cursor position.
 uint16_t* video_mem = 0;
 uint16_t terminal_row = 0;
 uint16_t terminal_col = 0;
-//colours:
+// VGA text-mode colour attribute values.
 uint16_t black = 0;
 uint16_t blue = 1;
 uint16_t green = 2;
@@ -28,12 +29,13 @@ uint16_t light_red = 12;
 uint16_t pink = 13;
 uint16_t yellow = 14;
 uint16_t white = 15;
-//colour settings variables
+// Default text and background colours used by terminal output.
 uint16_t text_colour = 13;
 uint16_t bgcolour = 15;
 uint16_t foreground = 0;
  
 
+// Pack a VGA colour attribute and character into one text-mode cell.
 uint16_t terminal_make_char(char c, char colour)
 {
 	return (colour << 8) | c;
@@ -64,11 +66,13 @@ const char* TerryQuotes[] =
 	"\"TempleOS is my masterpiece.\"\n- Terry Davis, Creator of TempleOS, RIP"
 };
 
+// Print one quote selected from the table above.
 void terry_quote()
 {
 	print(TerryQuotes[random_range(0, 20)], 15);
 }
 
+// Format a double as fixed-point decimal text, preserving its sign.
 void double_to_string(double value, char *buffer, int precision)
 {
     char *ptr = buffer;
@@ -159,6 +163,7 @@ int colour_contrast(int incolour)
 }
 
 void int_to_string(int num, char* str);
+// Format a float with the requested number of digits after the decimal point.
 void float_to_string(float value, char *str, int precision)
 {
     if (precision < 0) precision = 0;
@@ -195,6 +200,7 @@ void float_to_string(float value, char *str, int precision)
     *str = '\0';
 }
 
+// Convert a signed integer to decimal, including INT_MIN without signed overflow.
 void int_to_string(int num, char* str)
 {
     unsigned int n;
@@ -248,6 +254,7 @@ void terminal_putchar(int x, int y, char c, char colour)
 }
 
 
+// Write bytes as hexadecimal pairs, optionally separating them with spaces.
 void print_hex(uint8_t* data, int length, int spaces)
 {
     const char* hex = "0123456789ABCDEF";
@@ -272,6 +279,7 @@ void print_hex(uint8_t* data, int length, int spaces)
 
 void terminal_writechar(char c, char colour)
 {	
+	// Newlines reset the column; ordinary characters advance and wrap at screen width.
 	if (c == '\n')
 	{
 		terminal_row += 1;
@@ -289,7 +297,7 @@ void terminal_writechar(char c, char colour)
 
 void terminal_initialize()
 {
-	// video_mem[0] = 0x0341;  color first then ascii value because of endianness prints A in blue
+	// VGA text memory starts at this physical address; clear every visible cell.
 	video_mem = (uint16_t*)(0xB8000);
 	terminal_row = 0;
 	terminal_col = 0;
@@ -315,6 +323,7 @@ size_t strlen(const char* str)
 
 void print(const char* str, char colour)
 {	
+	// Route each character through the cursor-aware writer so wrapping is consistent.
 	size_t len = strlen(str);
 	for (int i = 0; i < len; i++)
 	{
@@ -325,10 +334,11 @@ void print(const char* str, char colour)
 
 void kernel_main()
 {
+	// Initialize the terminal and interrupt handling before running kernel checks.
 	random_init();
 	bgcolour = black;
 	terminal_initialize();
-
+	print("Psst... hey, you! Welcome to the kernel!\n", 15);
 	print("Initialised entropy [", 15);
 	print(" OK ", 2);
 	print("]\n", 15);
@@ -337,16 +347,18 @@ void kernel_main()
 	print(" OK ", 2);
 	print("]\n", 15);
 
-	// video_mem[79] = terminal_make_char('A', 2); print A in green on the last column
-	// initialise interrupt descriptor table
-
+	// Example: write a green 'A' into the final column of the first VGA row.
+	// video_mem[79] = terminal_make_char('A', 2);
+	// Install the interrupt descriptor table before enabling interrupts.
 	print("Initialising interrupt descriptor table ", 15);
 	idt_init();
+	// Enable CPU interrupt delivery only after installing the IDT.
+	enable_interrupts();
 	print("[", 15);
 	print(" OK ", 2);
 	print("]\n", 15);
 	print("Testing randomness [", 15);
-	//generate 6 random numbers
+	// Generate and display sample values as a basic RNG startup check.
 	char num = random_range(0, 50);
 	char str[12];
 	int_to_string(num, str);
@@ -366,7 +378,7 @@ void kernel_main()
 	char str5[12];
 	int_to_string(num5, str5);
 
-	//compare the random numbers
+	// Identical samples are treated as a startup failure.
 	if(num == num1 && num1 == num2 && num2 == num3 && num3 == num4 && num4 == num5)
 	{
 		print("[ ", 15);
@@ -394,6 +406,7 @@ void kernel_main()
 	print(str5, 15);
 	
 	print("\nTesting power maths function ", 15);
+	// Exercise power() with matching base/exponent pairs from zero through four.
 	int done = 0;
 	while (!done)
 	{
@@ -471,6 +484,7 @@ void kernel_main()
 	double sqrt_test9 = ks_sqrt(1.0);
 	char sqrt_teststr9[32];
 	print("\nTesting SQRT function: ", 15);
+	// Compare computed roots to reference values and report their decimal forms.
 	double error0 = sqrt_test0 - 3.162277660168379332;
 	double error1 = sqrt_test0 - 3.000000000000000000;
 	double error2 = sqrt_test0 - 2.828427124746190098;
@@ -544,7 +558,7 @@ void kernel_main()
 	generate_aes256_key(aes_key);
 
 	print("\nAES-256 Key: ", text_colour);
-	print_hex(aes_key, 32, 0); // print aes key thats 32 bytes with no spaces
+	print_hex(aes_key, 32, 0); // Display all 32 key bytes without separators.
 	terry_quote();
-	outb(0x60, 0xff);
+	print("\n", 0);
 }

@@ -60,6 +60,13 @@ boot:
 	docker exec -w /hostpwd ubuntu /bin/bash -c "./build.sh"
 	qemu-system-x86_64 -hda ./bin/os.bin
 
+# Build in the SSD-backed Docker bind mount, then boot its image with macOS QEMU
+.PHONY: boot-ssd
+boot-ssd:
+	docker start ubuntu
+	docker exec -w /hostpwd ubuntu /bin/bash -c "./build.sh"
+	qemu-system-x86_64 -hda ./bin/os.bin
+
 docker: 
 	docker start ubuntu
 	docker exec -it -w /hostpwd ubuntu /bin/bash
